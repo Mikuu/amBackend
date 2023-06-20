@@ -1,1 +1,1 @@
-MICOO_DB_USERNAME=micoo-user MICOO_DB_PASSWORD=micoo-password npm start
+AMB_DB_USERNAME=amb-user AMB_DB_PASSWORD=amb-password npm start

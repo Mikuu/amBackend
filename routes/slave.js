@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const projectService = require("../services/project-service");
-const buildService = require("../services/build-service");
+const buildService = require("../services/view-service");
 const compareService = require("../services/compare-service");
 const fileService = require("../services/file-service");
 const envConfig = require("../config/env.config");
@@ -51,9 +51,9 @@ router.post("/build/initialize", authenticateAPIKey, function(req, res, next) {
 
             const apiKeyInRequest = req.get("x-api-key");
             if (project.getAPIKey() !== apiKeyInRequest) {
-                return res.status(StatusCodes.UNAUTHORIZED).send({ 
-                    code: StatusCodes.UNAUTHORIZED, 
-                    message: `invalid API Key: ${apiKeyInRequest}` 
+                return res.status(StatusCodes.UNAUTHORIZED).send({
+                    code: StatusCodes.UNAUTHORIZED,
+                    message: `invalid API Key: ${apiKeyInRequest}`
                 }).end();
             }
 
@@ -96,9 +96,9 @@ router.post("/images/project-tests/:pid", authenticateAPIKey, function(req, res,
 
         const apiKeyInRequest = req.get("x-api-key");
         if (project.getAPIKey() !== apiKeyInRequest) {
-            return res.status(StatusCodes.UNAUTHORIZED).send({ 
-                code: StatusCodes.UNAUTHORIZED, 
-                message: `invalid API Key: ${apiKeyInRequest}` 
+            return res.status(StatusCodes.UNAUTHORIZED).send({
+                code: StatusCodes.UNAUTHORIZED,
+                message: `invalid API Key: ${apiKeyInRequest}`
             }).end();
         }
 
