@@ -25,7 +25,7 @@ router.post(
 
             const project = await projectService.createProject(projectName, projectDisplayName);
 
-            return res.status(StatusCodes.OK).send({
+            return res.status(StatusCodes.CREATED).send({
                 pid: project.pid,
                 projectName: project.projectName
             });

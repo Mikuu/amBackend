@@ -1,8 +1,6 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const uuidUtils = require("../utils/uuid-utils");
-
 const Schema = mongoose.Schema;
 
 /**
@@ -13,20 +11,24 @@ const NodeSchema = new Schema({
     vid: { type: String, default: "", trim: true, maxlength: 50 },
     nid: { type: String, default: "", trim: true, maxlength: 50 },
 
-    // Elixir default attributes
+    parentId: { type: String, default: "", trim: true, maxlength: 50 },
+
+    /** Elixir default attributes **/
     id: { type: String, default: "", trim: true, maxlength: 50 },
     topic: { type: String, default: "", trim: true, maxlength: 5000 },
     memo: { type: String, default: "", trim: true, maxlength: 9999 },
-    style: {},
-    // parent: {},
+    style: { type: String, default: "", trim: true, maxlength: 1000 },
     tags: [{ type: String }],
     icons: [{ type: String }],
     hyperLink: { type: String, default: "", trim: true, maxlength: 50 },
-    image: {},
     root: { type: Boolean, default: false },
-    children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Node'}],
+    childrenIds: [{ type: String }],
     direction: { type: Number, default: 0, enum: [0, 1] },
-});
+
+    /** Default, but NOT ot to support **/
+    // image: {},
+    // parent: {
+}, { timestamps: true });
 
 /**
  * Validations
@@ -39,20 +41,7 @@ NodeSchema.path("id").required(true, "id cannot be blank");
 /**
  * Methods
  */
-NodeSchema.methods = {
-    create: function (pid, vid, id, topic, root, children) {
-        this.pid = pid;
-        this.vid = vid;
-        this.nid = uuidUtils.nodeUuid();
-        this.id = id;
-        this.topic = topic;
-        this.root = root;
-        this.children = children;
-        this.direction = 0;
-
-        return this.save();
-    }
-};
+NodeSchema.methods = {};
 
 module.exports = {
     NodeSchema

@@ -14,8 +14,7 @@ const ProjectSchema = new Schema({
     apiKey: { type: String, default: "", trim: true, maxlength: 100 },
     projectName: { type: String, default: "", trim: true, maxlength: 50 },
     projectDisplayName: { type: String, default: "", trim: true, maxlength: 50 },
-    createdAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
 /**
  * Validations

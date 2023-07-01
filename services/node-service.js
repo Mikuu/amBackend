@@ -1,19 +1,82 @@
 const mongoose = require("mongoose");
 const { NodeSchema } = require("../models/node");
+const { nodeUuid } = require("../utils/uuid-utils");
 
 const Node = new mongoose.model('Node', NodeSchema);
 
-const createNode = async (pid, vid, id, topic, root, children) => {
-    const node = await new Node();
-    await node.create(pid, vid, id, topic, root, children);
+const createNode = async (pid, vid, nodeData) => {
+    const newNode = await Node();
+    newNode.pid = pid;
+    newNode.vid = vid;
+    newNode.nid = nodeUuid();
 
-    return node;
+    for (let key in nodeData) {
+        if (nodeData.hasOwnProperty(key) && nodeData[key] !== undefined && nodeData[key] !== null) {
+            newNode[key] = nodeData[key];
+        }
+    }
+
+    await newNode.save();
+    return newNode;
 };
 
-const updateNodeByNid = async (id, newValues) => {
-    return await Node.findOneAndUpdate({ id: id }, newValues, { new: true });
+const findAndUpdateNode = async (pid, vid, nodeData) => {
+    const savedNode = await Node.findOneAndUpdate({ pid: pid, vid: vid, id: nodeData.id},
+        {
+            topic: nodeData.topic,
+            memo: nodeData.memo,
+            style: JSON.stringify(nodeData.style),
+            tags: nodeData.tags,
+            icons: nodeData.icons,
+            hyperLink: nodeData.hyperLink,
+            root: nodeData.root,
+            childrenIds: nodeData.childrenIds,
+            direction: nodeData.direction,
+            parentId: nodeData.parentId,
+        }, { new: true });
+
+    return savedNode;
+};
+
+const deleteNode = async (pid, vid, id) => {
+    let deletedCount = 0;
+
+    const nodeData = await Node.findOne({id});
+    if (!nodeData) {
+        return;
+    }
+
+    /** remove id from parent's children list **/
+    const parentNode = await Node.findOne({ id: nodeData.parentId });
+    if (parentNode) {
+        parentNode.childrenIds = parentNode.childrenIds.filter(id => id !== nodeData.id);
+        await parentNode.save();
+    }
+
+    /** delete all children nodes **/
+    const deleteNodeAndChildren = async id => {
+        const targetNode = await Node.findOne({ pid, vid, id });
+         if (!targetNode) {
+             return;
+         }
+
+        /** delete current node **/
+        const result = await Node.deleteOne({ pid, vid, id });
+        deletedCount += result.deletedCount;
+
+        for (const childId of targetNode.childrenIds) {
+            await deleteNodeAndChildren(childId);
+        }
+    }
+
+    await deleteNodeAndChildren(nodeData.id);
+
+
+    return deletedCount;
 };
 
 module.exports = {
-    createNode
+    createNode,
+    findAndUpdateNode,
+    deleteNode,
 };
