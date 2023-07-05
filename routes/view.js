@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const { generalResponse } = require("../utils/common-utils");
-const { check, validationResult } = require("express-validator");
+const { check, query, validationResult } = require("express-validator");
 const viewService = require("../services/view-service");
 const nodeService = require("../services/node-service");
 
@@ -41,6 +41,53 @@ router.post("/view",
             console.error(error);
             next(error);
         }
+    })();
+});
+
+/* Fetch view */
+router.get("/view",
+    [
+        query("pid", "pid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+        query("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+    ],
+    function(req, res, next) {
+    (async () => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
+        }
+
+        viewService.getView(req.query.pid, req.query.vid)
+            .then(view => {
+                if (!view) {
+                    return res.status(StatusCodes.NOT_FOUND).send({
+                        pid: req.query.pid,
+                        vid: req.query.vid,
+                        message: "view not found",
+                    });
+                }
+
+                return res.status(StatusCodes.OK).send({
+                    pid: view.pid,
+                    vid: view.vid,
+                    viewType: view.viewType,
+                    direction: view.direction,
+                    theme: {
+                        name: view.theme.name,
+                        palette: view.theme.palette,
+                        cssVar: {
+                            "--color": view.theme.cssVar['--color'],
+                            "--main-color": view.theme.cssVar['--main-color'],
+                            "--bgcolor": view.theme.cssVar['--bgcolor'],
+                            "--main-bgcolor": view.theme.cssVar['--main-bgcolor'],
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                next(error);
+            });
     })();
 });
 

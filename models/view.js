@@ -15,7 +15,7 @@ const CssVarSchema = new Schema({
 const ThemeSchema = new Schema({
     cssVar: { type: CssVarSchema, default: () => ({}) },
     name: { type: String, default: "Latte", trim: true, maxlength: 50 },
-    palette: [{ type: String, default: ["#dd7878", "#ea76cb", "#8839ef", "#e64553", "#fe640b", "#df8e1d", "#40a02b", "#209fb5", "#1e66f5", "#7287fd"] }],
+    palette: { type: [String], default: ["#dd7878", "#ea76cb", "#8839ef", "#e64553", "#fe640b", "#df8e1d", "#40a02b", "#209fb5", "#1e66f5", "#7287fd"]},
 }, { timestamps: true });
 
 /**

@@ -4,6 +4,10 @@ const { nodeUuid } = require("../utils/uuid-utils");
 
 const Node = new mongoose.model('Node', NodeSchema);
 
+const fetchNodes = async (pid, vid) => {
+    return await Node.find({pid: pid, vid: vid});
+};
+
 const createNode = async (pid, vid, nodeData) => {
     const newNode = await Node();
     newNode.pid = pid;
@@ -21,11 +25,11 @@ const createNode = async (pid, vid, nodeData) => {
 };
 
 const findAndUpdateNode = async (pid, vid, nodeData) => {
-    const savedNode = await Node.findOneAndUpdate({ pid: pid, vid: vid, id: nodeData.id},
+    return await Node.findOneAndUpdate({ pid: pid, vid: vid, id: nodeData.id},
         {
             topic: nodeData.topic,
             memo: nodeData.memo,
-            style: JSON.stringify(nodeData.style),
+            style: nodeData.style,
             tags: nodeData.tags,
             icons: nodeData.icons,
             hyperLink: nodeData.hyperLink,
@@ -34,8 +38,6 @@ const findAndUpdateNode = async (pid, vid, nodeData) => {
             direction: nodeData.direction,
             parentId: nodeData.parentId,
         }, { new: true });
-
-    return savedNode;
 };
 
 const deleteNode = async (pid, vid, id) => {
@@ -76,6 +78,7 @@ const deleteNode = async (pid, vid, id) => {
 };
 
 module.exports = {
+    fetchNodes,
     createNode,
     findAndUpdateNode,
     deleteNode,

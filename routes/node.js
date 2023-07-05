@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const { generalResponse } = require("../utils/common-utils");
-const { check, validationResult } = require("express-validator");
+const { check, query, validationResult } = require("express-validator");
 const nodeService = require("../services/node-service");
 
-/* Create node */
+/* Create nodes */
 router.post("/nodes/bulk", [
         check("pid", "pid must be provided").matches(/^[a-zA-Z0-9]+$/),
         check("vid", "vid only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
@@ -51,5 +51,54 @@ router.post("/nodes/bulk", [
         }
     })();
 });
+
+/* Fetch nodes */
+router.get("/nodes/bulk", [
+        query("pid", "pid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+        query("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+    ],
+    function(req, res, next) {
+        (async () => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
+            }
+
+            try {
+                const pid = req.query.pid;
+                const vid = req.query.vid;
+                const nodes = await nodeService.fetchNodes(pid, vid);
+
+                return res.status(StatusCodes.OK).send({
+                    pid: pid,
+                    vid: vid,
+                    counts: nodes.length,
+                    nodes: nodes.map(node => {
+                        return {
+                            id: node.id,
+                            root: node.root,
+                            tags: node.tags,
+                            memo: node.memo,
+                            style: node.style,
+                            topic: node.topic,
+                            icons: node.icons,
+                            parentId: node.parentId,
+                            direction: node.direction,
+                            hyperLink: node.hyperLink,
+                            childrenIds: node.childrenIds,
+
+                            // createdA: node.createdAt,
+                            // updatedAt: node.updatedAt,
+                        }
+                    }),
+                });
+
+            } catch (error) {
+                console.error(error);
+                next(error);
+            }
+        })();
+    });
+
 
 module.exports = router;

@@ -17,7 +17,7 @@ const NodeSchema = new Schema({
     id: { type: String, default: "", trim: true, maxlength: 50 },
     topic: { type: String, default: "", trim: true, maxlength: 5000 },
     memo: { type: String, default: "", trim: true, maxlength: 9999 },
-    style: { type: String, default: "", trim: true, maxlength: 1000 },
+    style: { type: Schema.Types.Mixed, default: {}, trim: true, maxlength: 1000 },
     tags: [{ type: String }],
     icons: [{ type: String }],
     hyperLink: { type: String, default: "", trim: true, maxlength: 50 },
