@@ -4,13 +4,15 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const projectService = require("../services/project-service");
 const { generalResponse } = require("../utils/common-utils");
+const { keycloak } = require("../middlewares/keycloak");
 
 /* Create project */
 router.post(
     "/project",
     [
-    check("projectName", "project name, length must less than 20").isLength({ min: 1, max: 20 }),
-    check("projectName", "only accept letters in [a-zA-Z0-9\\s\\-_]").matches(/^[a-zA-Z0-9\-_\s]+$/)
+        keycloak.protect(),
+        check("projectName", "project name, length must less than 20").isLength({ min: 1, max: 20 }),
+        check("projectName", "only accept letters in [a-zA-Z0-9\\s\\-_]").matches(/^[a-zA-Z0-9\-_\s]+$/)
     ],
     function(req, res, next) {
     (async () => {

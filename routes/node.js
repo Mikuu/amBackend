@@ -4,9 +4,13 @@ const { StatusCodes } = require('http-status-codes');
 const { generalResponse } = require("../utils/common-utils");
 const { check, query, validationResult } = require("express-validator");
 const nodeService = require("../services/node-service");
+const { keycloak } = require("../middlewares/keycloak");
+
+// router.use(keycloak.middleware());
 
 /* Create nodes */
 router.post("/nodes/bulk", [
+        keycloak.protect(),
         check("pid", "pid must be provided").matches(/^[a-zA-Z0-9]+$/),
         check("vid", "vid only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
         check("updateNodes", "updateNodes must be provide as an array").isArray(),
@@ -53,7 +57,9 @@ router.post("/nodes/bulk", [
 });
 
 /* Fetch nodes */
-router.get("/nodes/bulk", [
+router.get("/nodes/bulk",
+    [
+        keycloak.protect(),
         query("pid", "pid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
         query("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
     ],

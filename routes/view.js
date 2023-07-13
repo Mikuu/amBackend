@@ -5,10 +5,12 @@ const { generalResponse } = require("../utils/common-utils");
 const { check, query, validationResult } = require("express-validator");
 const viewService = require("../services/view-service");
 const nodeService = require("../services/node-service");
+const { keycloak } = require("../middlewares/keycloak");
 
 /* Create view */
 router.post("/view",
     [
+        keycloak.protect(),
         check("pid", "pid must be provided").matches(/^[a-zA-Z0-9]+$/),
         check("viewType", "only accept letters in [a-zA-Z]").matches(/^[a-zA-Z]+$/),
         check("id", "only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
@@ -47,6 +49,7 @@ router.post("/view",
 /* Fetch view */
 router.get("/view",
     [
+        keycloak.protect(),
         query("pid", "pid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
         query("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
     ],
