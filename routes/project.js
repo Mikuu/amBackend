@@ -10,7 +10,7 @@ const { keycloak } = require("../middlewares/keycloak");
 router.post(
     "/project",
     [
-        keycloak.protect(),
+        keycloak.protect('automind-app:app-user'),
         check("projectName", "project name, length must less than 20").isLength({ min: 1, max: 20 }),
         check("projectName", "only accept letters in [a-zA-Z0-9\\s\\-_]").matches(/^[a-zA-Z0-9\-_\s]+$/)
     ],

@@ -12,6 +12,7 @@ const NodeSchema = new Schema({
     nid: { type: String, default: "", trim: true, maxlength: 50 },
 
     parentId: { type: String, default: "", trim: true, maxlength: 50 },
+    nodeType: { type: String, default: "general", enum: ['scenario', 'test', 'result', 'general'], trim: true },
 
     /** Elixir default attributes **/
     id: { type: String, default: "", trim: true, maxlength: 50 },

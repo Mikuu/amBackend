@@ -18,7 +18,17 @@ const generalResponse = message => {
     };
 };
 
+const catchAsync = (asyncFunction) => {
+    return (req, res, next) => {
+        asyncFunction(req, res, next).catch(error => {
+            console.error(error);
+            next(error);
+        });
+    };
+};
+
 module.exports = {
     processLogger,
-    generalResponse
+    generalResponse,
+    catchAsync
 }

@@ -8,9 +8,9 @@ const { keycloak } = require("../middlewares/keycloak");
 
 // router.use(keycloak.middleware());
 
-/* Create nodes */
+/* Create & update nodes */
 router.post("/nodes/bulk", [
-        keycloak.protect(),
+        keycloak.protect('automind-app:app-user'),
         check("pid", "pid must be provided").matches(/^[a-zA-Z0-9]+$/),
         check("vid", "vid only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
         check("updateNodes", "updateNodes must be provide as an array").isArray(),
@@ -59,7 +59,7 @@ router.post("/nodes/bulk", [
 /* Fetch nodes */
 router.get("/nodes/bulk",
     [
-        keycloak.protect(),
+        keycloak.protect('automind-app:app-user'),
         query("pid", "pid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
         query("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
     ],
