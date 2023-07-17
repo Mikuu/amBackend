@@ -8,6 +8,18 @@ const fetchNodes = async (pid, vid) => {
     return await Node.find({pid: pid, vid: vid});
 };
 
+const getNode = async (pid, vid, id) => {
+    return await Node.findOne({pid, vid, id});
+};
+
+const findNode = async (options) => {
+    return await Node.findOne(options);
+};
+
+const updateNode = async (filterOptions, updateOptions) => {
+    return await Node.updateOne(filterOptions, updateOptions);
+};
+
 const createNode = async (pid, vid, nodeData) => {
     const newNode = await Node();
     newNode.pid = pid;
@@ -22,6 +34,13 @@ const createNode = async (pid, vid, nodeData) => {
 
     await newNode.save();
     return newNode;
+};
+
+const appendChild = async (parentNode, childNode) => {
+    if (!parentNode.childrenIds.includes(childNode.id)) {
+        parentNode.childrenIds.push(childNode.id);
+        await parentNode.save();
+    }
 };
 
 const findAndUpdateNode = async (pid, vid, nodeData) => {
@@ -79,7 +98,11 @@ const deleteNode = async (pid, vid, id) => {
 
 module.exports = {
     fetchNodes,
+    getNode,
+    findNode,
+    updateNode,
     createNode,
+    appendChild,
     findAndUpdateNode,
     deleteNode,
 };

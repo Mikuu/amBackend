@@ -3,7 +3,7 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const { generalResponse, catchAsync } = require("../utils/common-utils");
 const { check, query, validationResult } = require("express-validator");
-const nodeService = require("../services/node-service");
+const resultService = require("../services/result-service");
 const { keycloak } = require("../middlewares/keycloak");
 
 /* update result nodes */
@@ -19,14 +19,17 @@ router.put("/nodes/results", [
             return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
         }
 
-        const updatedTests = [];
+        const results = [];
         for (const test of req.body.tests) {
-            console.log(test);
+            const resultNode = await resultService.createOrUpdateResult(req.body.pid, req.body.vid, test.id, test.result);
 
-            updatedTests.push(test.id);
+            if (resultNode) {
+                console.log(resultNode);
+                results.push({ testNodeId: test.id, resultNodeId: resultNode.id, result: resultNode.topic});
+            }
         }
 
-        return res.status(StatusCodes.OK).send({ pid: req.body.pid, vid: req.body.vid, updatedTests: updatedTests });
+        return res.status(StatusCodes.OK).send({ pid: req.body.pid, vid: req.body.vid, updatedTests: results });
     })
 
 );
