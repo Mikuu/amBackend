@@ -10,10 +10,10 @@ const Schema = mongoose.Schema;
  * Project Schema
  */
 const ProjectSchema = new Schema({
-    pid: { type: String, default: "", trim: true, maxlength: 50 },
-    apiKey: { type: String, default: "", trim: true, maxlength: 100 },
-    projectName: { type: String, default: "", trim: true, maxlength: 50 },
-    projectDisplayName: { type: String, default: "", trim: true, maxlength: 50 },
+    pid: { type: String, default: "", trim: true, maxlength: 50, unique: true, required: true },
+    apiKey: { type: String, default: "", trim: true, maxlength: 100, unique: true, required: true },
+    projectName: { type: String, default: "", trim: true, maxlength: 50, unique: true, required: true },
+    projectDisplayName: { type: String, default: "", trim: true, maxlength: 50, unique: true, required: true },
 }, { timestamps: true });
 
 /**
