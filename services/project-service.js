@@ -10,11 +10,16 @@ const createProject = async (projectName, projectDisplayName) => {
     return project;
 };
 
+const getProjects = async () => {
+    return await Project.find();
+};
+
 const getProjectByPid = async pid => {
     return await Project.findOne({ pid });
 };
 
 module.exports = {
+    getProjects,
     createProject,
     getProjectByPid,
 };

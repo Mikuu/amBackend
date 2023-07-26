@@ -3,8 +3,37 @@ const { check, validationResult } = require("express-validator");
 const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const projectService = require("../services/project-service");
-const { generalResponse } = require("../utils/common-utils");
+const { generalResponse, catchAsync } = require("../utils/common-utils");
 const { keycloak } = require("../middlewares/keycloak");
+
+/* Retrieve projects */
+router.get(
+    "/projects",
+    [
+        keycloak.protect('automind-app:app-user'),
+    ],
+    catchAsync(async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
+        }
+
+        // ToDo: validate user info to return authorized projects, not all projects.
+
+        const response = [];
+        for(const project of await projectService.getProjects()) {
+            response.push({
+                pid: project.pid,
+                projectName: project.projectDisplayName
+            })
+        }
+
+        return res.status(StatusCodes.OK).send({
+            counts: response.length,
+            projects: response
+        })
+    })
+);
 
 /* Create project */
 router.post(
@@ -29,7 +58,7 @@ router.post(
 
             return res.status(StatusCodes.CREATED).send({
                 pid: project.pid,
-                projectName: project.projectName
+                projectName: project.projectDisplayName
             });
 
         } catch (error) {
