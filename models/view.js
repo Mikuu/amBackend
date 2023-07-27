@@ -26,6 +26,8 @@ const ViewSchema = new Schema({
     vid: { type: String, default: "", trim: true, maxlength: 50 },
     // requirements, tests, automation
     viewType: { type: String, default: "requirements", trim: true, maxlength: 15 },
+    viewName: { type: String, default: "", trim: true, maxlength: 50, unique: true, required: true },
+    viewDisplayName: { type: String, default: "", trim: true, maxlength: 50, unique: true, required: true },
 
     /** Elixir default attributes **/
     direction: { type: Number, default: 1, enum: [0, 1] },
