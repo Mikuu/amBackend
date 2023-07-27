@@ -3,7 +3,7 @@ const { check, validationResult } = require("express-validator");
 const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const projectService = require("../services/project-service");
-const { generalResponse, catchAsync } = require("../utils/common-utils");
+const { generalResponse, catchAsync, GResponse } = require("../utils/common-utils");
 const { keycloak } = require("../middlewares/keycloak");
 
 /* Retrieve projects */
@@ -35,6 +35,32 @@ router.get(
     })
 );
 
+/* Delete project */
+router.delete(
+    "/project/:pid",
+    [
+        keycloak.protect('automind-app:app-user'),
+        check("pid", "missing PID in the form of [a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
+    ],
+    catchAsync(async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
+        }
+
+        // ToDo: validate if the user is authorized to delete its given pid project
+
+        const { deletedProjectCount, deletedNodesCount, deletedViewsCount } = await projectService.deleteProject(req.params.pid);
+
+        return res.status(StatusCodes.OK).send({
+            pid: req.params.pid,
+            deletedProjectCount,
+            deletedViewsCount,
+            deletedNodesCount
+        })
+    })
+);
+
 /* Create project */
 router.post(
     "/project",
@@ -43,29 +69,26 @@ router.post(
         check("projectName", "project name, length must less than 20").isLength({ min: 1, max: 20 }),
         check("projectName", "only accept letters in [a-zA-Z0-9\\s\\-_]").matches(/^[a-zA-Z0-9\-_\s]+$/)
     ],
-    function(req, res, next) {
-    (async () => {
+    catchAsync(async (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
         }
 
-        try {
-            const projectDisplayName = req.body.projectName;
-            const projectName = req.body.projectName.toLowerCase().replace(/\s/g, "_");
+        const projectDisplayName = req.body.projectName;
+        const projectName = req.body.projectName.toLowerCase().replace(/\s/g, "_");
 
-            const project = await projectService.createProject(projectName, projectDisplayName);
-
-            return res.status(StatusCodes.CREATED).send({
-                pid: project.pid,
-                projectName: project.projectDisplayName
-            });
-
-        } catch (error) {
-            console.error(error);
-            next(error);
+        if (await projectService.projectNameExist(projectDisplayName)) {
+            return res.status(StatusCodes.BAD_REQUEST).send(GResponse.failed(`project name '${projectDisplayName}' already exists`));
         }
-    })();
-});
+
+        const project = await projectService.createProject(projectName, projectDisplayName);
+
+        return res.status(StatusCodes.CREATED).send({
+            pid: project.pid,
+            projectName: project.projectDisplayName
+        });
+    })
+);
 
 module.exports = router;

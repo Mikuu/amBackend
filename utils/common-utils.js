@@ -19,12 +19,34 @@ const generalResponse = message => {
     };
 };
 
+const GResponse = {
+    succeed(message) {
+        return {
+            code: StatusCodes.OK,
+            message: message
+        }
+    },
+
+    failed(message) {
+        return {
+            code: StatusCodes.BAD_REQUEST,
+            message: message
+        }
+    },
+
+    error(message) {
+        return {
+            code: StatusCodes.INTERNAL_SERVER_ERROR,
+            message: message
+        }
+    },
+}
+
 const catchAsync = (asyncFunction) => {
     return (req, res, next) => {
         asyncFunction(req, res, next).catch(error => {
             console.error(error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error: "system error" });
-            // next("system error");
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(GResponse.error("System Error"));
         });
     };
 };
@@ -32,5 +54,6 @@ const catchAsync = (asyncFunction) => {
 module.exports = {
     processLogger,
     generalResponse,
-    catchAsync
+    catchAsync,
+    GResponse,
 }

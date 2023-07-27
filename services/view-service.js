@@ -14,7 +14,13 @@ const createView = async (pid, viewType) => {
     return view;
 };
 
+const deleteViewByPid = async (pid) => {
+    const { deletedCount } = await View.deleteMany({ pid });
+    return deletedCount;
+};
+
 module.exports = {
     getView,
-    createView
+    createView,
+    deleteViewByPid,
 };
