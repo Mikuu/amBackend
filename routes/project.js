@@ -35,6 +35,35 @@ router.get(
     })
 );
 
+/* Get projects */
+router.get(
+    "/project/:pid",
+    [
+        keycloak.protect('automind-app:app-user'),
+        check("pid", "missing PID in the form of [a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
+    ],
+    catchAsync(async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).json(generalResponse(errors.array()).failed);
+        }
+
+        // ToDo: validate user info to return authorized projects, not all projects.
+
+        const project = await projectService.getProjectByPid(req.params.pid);
+
+        if (project) {
+            return res.status(StatusCodes.OK).send({
+                pid: project.pid,
+                projectName: project.projectDisplayName
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).send(GResponse.failed("project not found"));
+        }
+
+    })
+);
+
 /* Delete project */
 router.delete(
     "/project/:pid",
