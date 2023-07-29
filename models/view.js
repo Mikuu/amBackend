@@ -47,10 +47,12 @@ ViewSchema.path("viewType").required(true, "view type cannot be blank");
  * Methods
  */
 ViewSchema.methods = {
-    create: function(pid, viewType) {
+    create: function(pid, viewType, viewName, viewDisplayName) {
         this.pid = pid;
         this.vid = uuidUtils.viewUuid();
         this.viewType = viewType;
+        this.viewName = viewName;
+        this.viewDisplayName = viewDisplayName;
         return this.save();
     }
 };

@@ -40,6 +40,13 @@ const GResponse = {
             message: message
         }
     },
+
+    notFound(message) {
+        return {
+            code: StatusCodes.NOT_FOUND,
+            message: message
+        }
+    }
 }
 
 const catchAsync = (asyncFunction) => {

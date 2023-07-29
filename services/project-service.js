@@ -22,7 +22,7 @@ const getProjectByPid = async pid => {
 
 const deleteProject = async (pid) => {
     const deletedNodesCount = await nodeService.deleteNodesByPid(pid);
-    const deletedViewsCount = await viewService.deleteViewByPid(pid);
+    const deletedViewsCount = await viewService.deleteViewsByPid(pid);
 
     const { deletedCount } = await Project.deleteMany({ pid });
 
