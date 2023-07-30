@@ -11,12 +11,12 @@ const { keycloak } = require("../middlewares/keycloak");
 router.post("/view",
     [
         keycloak.protect('automind-app:app-user'),
-        check("pid", "pid must be provided").matches(/^[a-zA-Z0-9]+$/),
+        check("pid", "pid must be provided").matches(/^PID[a-zA-Z0-9]+$/),
         check("viewType", "only accept letters in [a-zA-Z]").matches(/^[a-zA-Z]+$/),
         check("viewName", "view name, length must less than 20").isLength({ min: 1, max: 20 }),
         check("viewName", "only accept letters in [a-zA-Z0-9\\s\\-_]").matches(/^[a-zA-Z0-9\-_\s]+$/),
-        check("rootNodeId", "only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
-        check("rootNodeTopic", "only accept letters in [a-zA-Z\\-_\\s]").matches(/^[a-zA-Z0-9\-_\s]+$/),
+        // check("rootNodeId", "only accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+        // check("rootNodeTopic", "only accept letters in [a-zA-Z\\-_\\s]").matches(/^[a-zA-Z0-9\-_\s]+$/),
     ],
     catchAsync(async (req, res, next) => {
         const errors = validationResult(req);
@@ -32,23 +32,24 @@ router.post("/view",
         const viewDisplayName = req.body.viewName;
         const viewName = viewDisplayName.toLowerCase().replace(/\s/g, "_");
         const view = await viewService.createView(req.body.pid, req.body.viewType, viewName, viewDisplayName);
-        const beginningNode = await nodeService.createNode(view.pid, view.vid,
-            {
-                topic: req.body.rootNodeTopic,
-                id: req.body.rootNodeId,
-                root: true
-            });
+        // const beginningNode = await nodeService.createNode(view.pid, view.vid,
+        //     {
+        //         topic: req.body.rootNodeTopic,
+        //         id: req.body.rootNodeId,
+        //         root: true
+        //     });
 
         return res.status(StatusCodes.CREATED).send({
             pid: view.pid,
             vid: view.vid,
-            viewName: view.viewDisplayName,
-            rootNode: {
-                pid: beginningNode.pid,
-                vid: beginningNode.vid,
-                nid: beginningNode.nid,
-                id: beginningNode.id
-            }
+            viewType: view.viewType,
+            viewName: view.viewDisplayName
+            // rootNode: {
+            //     pid: beginningNode.pid,
+            //     vid: beginningNode.vid,
+            //     nid: beginningNode.nid,
+            //     id: beginningNode.id
+            // }
         });
     })
 );
@@ -57,7 +58,7 @@ router.post("/view",
 router.get("/view/:vid",
     [
         keycloak.protect('automind-app:app-user'),
-        check("vid", "vid must be provided, accept letters in [a-zA-Z0-9]").matches(/^[a-zA-Z0-9]+$/),
+        check("vid", "vid must be provided, accept letters in VID[a-zA-Z0-9]").matches(/^VID[a-zA-Z0-9]+$/),
     ],
     catchAsync(async (req, res, next) => {
         const errors = validationResult(req);
@@ -95,7 +96,7 @@ router.get(
     "/views",
     [
         keycloak.protect('automind-app:app-user'),
-        check("pid", "missing PID in the form of [a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
+        query("pid", "missing PID in the form of PID[a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
     ],
     catchAsync(async (req, res, next) => {
         const errors = validationResult(req);
@@ -104,8 +105,9 @@ router.get(
         }
 
         const views = [];
-        for(const view of await viewService.getViews(req.body.pid)) {
+        for(const view of await viewService.getViews(req.query.pid)) {
             views.push({
+                pid: view.pid,
                 vid: view.vid,
                 viewType: view.viewType,
                 viewName: view.viewDisplayName
@@ -125,7 +127,7 @@ router.delete(
     "/views",
     [
         keycloak.protect('automind-app:app-user'),
-        check("pid", "missing PID in the form of [a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
+        query("pid", "missing PID in the form of PID[a-zA-Z0-9]").matches(/^PID[a-zA-Z0-9]+$/)
     ],
     catchAsync(async (req, res, next) => {
         const errors = validationResult(req);
@@ -135,7 +137,7 @@ router.delete(
 
         let deletedNodesCount = 0;
         let deletedViewsCount = 0;
-        for (const view of await viewService.getViews(req.body.pid)) {
+        for (const view of await viewService.getViews(req.query.pid)) {
             const deletingNodesCount = await nodeService.deleteNodesByVid(view.vid);
             const deletingViewsCount = await viewService.deleteViewsByPid(view.pid);
 
