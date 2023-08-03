@@ -3,6 +3,7 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const { generalResponse, catchAsync, GResponse} = require("../utils/common-utils");
 const { check, query, validationResult } = require("express-validator");
+const projectService = require("../services/project-service");
 const viewService = require("../services/view-service");
 const nodeService = require("../services/node-service");
 const { keycloak } = require("../middlewares/keycloak");
@@ -68,11 +69,13 @@ router.get("/view/:vid",
 
         const view = await viewService.getView(req.params.vid);
         if (view) {
+            const project = await projectService.getProjectByPid(view.pid);
             return res.status(StatusCodes.OK).send({
                 pid: view.pid,
                 vid: view.vid,
                 viewType: view.viewType,
                 viewName: view.viewDisplayName,
+                projectName: project.projectDisplayName,
                 direction: view.direction,
                 theme: {
                     name: view.theme.name,
